@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="dist/css/font-awesome.min.css">
+    <link rel="stylesheet" href="dist/css/style.css">
+    <title>Todo list</title>
+</head>
+<body>
+    <div id="app" >
+        <div style="margin-top: 50px;">
+        <h2 style="text-align: center">To Do App</h2>
+        <h3 style="text-align: center">In order to use this App your browser must support local storage!</h3>
+         </div>
+        <div class="row" style="margin-top:80px;">
+            <div class="col-sm-1"></div>
+        <div class="col-sm-5">
+        <div class="todo-wrapper">
+            <todo-header></todo-header>
+            <div class="todo-content">
+                <todo-list :collection="listState.items"></todo-list>
+            </div>
+        </div>
+        </div>
+
+        <div class="col-sm-5">
+                <div>
+                    <div class="todo-content">
+                            <todo-report></todo-report>
+
+                        <todo-list :collection="listState.items" class="todol"></todo-list>
+                    </div>
+                </div>
+        </div>
+        <div class="col-sm-1"></div>
+        </div>
+
+        <div class="row" style="padding-top:50px;">
+            <div class="col-sm-1"></div>
+
+            <div class="col-sm-5">
+                    <div class="todo-content">
+                    <todo-report2></todo-report2>
+                    <todo-list2 :collection="listState.items" class="todol"></todo-list2>
+                </div>
+                </div>
+
+                <div class="col-sm-5">
+                        <div class="todo-content">
+                        <todo-report1></todo-report1>
+                        <todo-list1 :collection="listState.items" class="todol"></todo-list1>
+                    </div>
+                    </div>
+                <div class="col-sm-1"></div>
+
+        </div>
+
+
+    </div>
+    
+    <!-- Header -->
+    <template id="todo-header">
+        <div class="todo-header">
+            <div class="overlay"></div>
+            <h2>What do you want to do?</h2>
+            <h4 style="color:#fff">Press the plus sign to add new to do items to your list</h4>
+            <div class="add-circle" @click="add">
+                <i class="fa fa-plus"></i> 
+            </div>
+        </div>
+    </template>
+    
+    <!-- ALL TASKS-->
+    <template id="todo-report">
+        <div class="todo-content-title">
+            <h2>Your tasks</h2>
+            <p class="task-report"><span class="task-remain">{{ taskDone }} done</span> / {{ taskTotal }} task(s)</p>
+        </div>
+    </template>
+    
+    <!-- DONE TASKS -->
+    <template id="todo-report1">
+        <div class="todo-content-title">
+            <h2>Done tasks</h2>
+            <p class="task-report"><span class="task-remain">{{ taskDone }} done</span> </p>
+        </div>
+    </template>
+
+     <!-- ACTIVE TASKS -->
+     <template id="todo-report2">
+            <div class="todo-content-title">
+                <h2>Active tasks</h2>
+                <p style="color:#fff">Check out your active tasks!</p>
+            </div>
+        </template>
+        
+   
+
+    <!-- Todo List ALL ITEMS-->
+    <template id="todo-list">
+        <ul class="todo-list">
+            <todo-item  v-for="item in collection" :model="item" ></todo-item>
+        </ul>
+    </template>
+ <!-- Todo List DONE ITEMS -->
+ <template id="todo-list1">
+        <ul class="todo-list">
+            <todo-item1  v-for="item in collection" :model="item" ></todo-item1>
+        </ul>
+    </template>
+
+    <!-- Todo List ACTIVE ITEMS-->
+ <template id="todo-list2">
+        <ul class="todo-list">
+            <todo-item2  v-for="item in collection" :model="item" ></todo-item2>
+        </ul>
+    </template>
+     
+
+ 
+    
+    <!-- ALL Item -->
+    <template id="todo-item">
+        <li class="todo-item" :class="{'editing': model.isEditing, 'task-done': isDone}" >
+            <span @click="showLabel" class="label {{ model.label }}" >
+                <ul class="action-pick-label action-popup" >
+                    <li @click="saveLabel('urgent')" class="important">Important</li>
+                    <li @click="saveLabel('normal')" class="normal">Normal</li>
+                    <li @click="saveLabel('other')" class="other">Less Important</li>
+                </ul>
+            </span>
+
+            <p class="text" v-if="model.isEditing" style="border-bottom: 1px solid #c8dcdb; padding-bottom:20px;">
+                <input type="text" v-model="tempText" placeholder="Add a task title" @keyup.enter="save">
+            </p>
+
+
+            <p class="text" v-if="model.isEditing">
+                <input type="text" v-model="descrText" placeholder="Add a task description and hit enter" @keyup.enter="save">
+            </p>
+
+            <p class="text" v-if="model.isEditing == false">Title: {{ model.text }}</p>
+            <p class="text" v-if="model.isEditing == false">Description: {{ model.text1 }}</p>
+            
+            <div class="todo-action" @click="showAction" v-if="model.isEditing == false || model.isEditing == null">
+                 <span class="more">
+                   <span></span><span></span><span></span>
+                 </span>
+
+                <ul class="action-list action-popup">
+                    <li @click="markDone" v-if="!isDone">Mark done</li>
+                    <li @click="edit" v-if="!isDone">Edit</li>
+                    <li @click="delete">Delete</li>
+                </ul>
+            </div>
+        </li>
+       
+    </template>
+
+ <!-- DONE ITEMS -->
+ <template id="todo-item1">
+        <li class="todo-item" v-if="isDone" :class="{'editing': model.isEditing, 'task-done': isDone}">
+            <span @click="showLabel" class="label {{ model.label }}">
+                <ul class="action-pick-label action-popup">
+                    <li @click="saveLabel('urgent')" class="important">Important</li>
+                    <li @click="saveLabel('normal')" class="normal">Normal</li>
+                    <li @click="saveLabel('other')" class="other">Less Important</li>
+                </ul>
+            </span>
+
+            <p class="text" v-if="model.isEditing">
+                <input type="text" v-model="tempText" placeholder="Type a new task and hit enter" @keyup.enter="save">
+            </p>
+
+
+            <p class="text" v-if="model.isEditing">
+                <input type="text" v-model="descrText" placeholder="Add a task description" @keyup.enter="save">
+            </p>
+
+            <p class="text" v-if="model.isEditing == false">Title: {{ model.text }}</p>
+            <p class="text" v-if="model.isEditing == false">Description: {{ model.text1 }}</p>
+        
+            <div class="todo-action" @click="showAction" v-if="model.isEditing == false || model.isEditing == null">
+                 <span class="more">
+                   <span></span><span></span><span></span>
+                 </span>
+
+                <ul class="action-list action-popup">
+                    <li @click="markDone" v-if="!isDone">Mark done</li>
+                    <li @click="edit" v-if="!isDone">Edit</li>
+                    <li @click="delete">Delete</li>
+                </ul>
+            </div>
+        </li>
+        
+    </template>
+    
+
+    <!-- ACTIVE ITEMS -->
+ <template id="todo-item2">
+        <li class="todo-item" v-if="!isDone" :class="{'editing': model.isEditing, 'task-done': isDone}" >
+            <span @click="showLabel" class="label {{ model.label }}">
+                <ul class="action-pick-label action-popup">
+                    <li @click="saveLabel('urgent')" class="important">Important</li>
+                    <li @click="saveLabel('normal')" class="normal">Normal</li>
+                    <li @click="saveLabel('other')" class="other">Less Important</li>
+                </ul>
+            </span>
+
+            <p class="text" v-if="model.isEditing">
+                <input type="text" v-model="tempText" placeholder="Type a new task and hit enter" @keyup.enter="save">
+            </p>
+
+
+            <p class="text" v-if="model.isEditing">
+                <input type="text" v-model="descrText" placeholder="Add a task description" @keyup.enter="save">
+            </p>
+
+            <p class="text" v-if="model.isEditing == false">Title: {{ model.text }}</p>
+            <p class="text" v-if="model.isEditing == false">Description: {{ model.text1 }}</p>
+            <div class="todo-action" @click="showAction" v-if="model.isEditing == false || model.isEditing == null">
+                 <span class="more">
+                   <span></span><span></span><span></span>
+                 </span>
+
+                <ul class="action-list action-popup">
+                    <li @click="markDone" v-if="!isDone">Mark done</li>
+                    <li @click="edit" v-if="!isDone">Edit</li>
+                    <li @click="delete">Delete</li>
+                </ul>
+            </div>
+        </li>
+    </template>
+    
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="dist/js/script.js"></script>
+</body>
+</html>
